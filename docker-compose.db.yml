@@ -1,0 +1,53 @@
+﻿version: '3.8'
+
+services:
+  user-db:
+    image: postgres:15
+    container_name: user-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: userdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - user-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  auth-db:
+    image: postgres:15
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - auth-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  music-db:
+    image: postgres:15
+    container_name: music-db
+    environment:
+      POSTGRES_DB: musicdb
+      POSTGRES_USER: music
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5435:5432"
+    volumes:
+      - music-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+volumes:
+  user-data:
+  auth-data:
+  music-data:
+
+networks:
+  backend:
+    driver: bridge

@@ -1,0 +1,2 @@
+rootProject.name = 'Spotify'
+include 'user-service', 'api-gateway', 'auth-service', 'music-service'
