@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -23,13 +24,13 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final UserClient userClient;
 
-    public String register(String username, String password) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            throw new UsernameAlreadyExistsException("Username already taken");
+    public String register(String email, String password, String name, Date birthday, String gender) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new UsernameAlreadyExistsException("This email is already registered. Please use another one.");
         }
 
         User user = new User();
-        user.setUsername(username);
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole("user");
 
@@ -40,7 +41,13 @@ public class AuthService {
         }
 
         try {
-            userClient.createUser(user.getId(), user.getUsername());
+            userClient.createUser(
+                    user.getId(),
+                    email,
+                    name,
+                    birthday,
+                    gender
+            );
         } catch (Exception e) {
             throw new DatabaseException("Failed to create user in user service", e);
         }
@@ -49,10 +56,11 @@ public class AuthService {
     }
 
 
+
     public String login(String username, String password) {
         User user;
         try {
-            user = userRepository.findByUsername(username)
+            user = userRepository.findByEmail(username)
                     .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
         } catch (InvalidCredentialsException e) {
             throw e;

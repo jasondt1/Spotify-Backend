@@ -3,6 +3,6 @@ package com.jasondt.musicservice.dto;
 import lombok.Data;
 
 @Data
-public class GenreRequestDto {
+public class GenreCreateDto {
     private String name;
 }

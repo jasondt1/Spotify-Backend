@@ -2,6 +2,7 @@ package com.jasondt.musicservice.dto;
 
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,4 +13,7 @@ public class ArtistResponseDto {
     private GenreResponseDto genre;
     private List<AlbumResponseDto> albums;
     private List<TrackResponseDto> tracks;
+    private String image;
+    private Instant createdAt;
+    private Instant updatedAt;
 }

@@ -1,6 +1,6 @@
 package com.jasondt.musicservice.service;
 
-import com.jasondt.musicservice.dto.AlbumRequestDto;
+import com.jasondt.musicservice.dto.AlbumCreateDto;
 import com.jasondt.musicservice.dto.AlbumResponseDto;
 import com.jasondt.musicservice.exception.DatabaseException;
 import com.jasondt.musicservice.exception.NotFoundException;
@@ -24,9 +24,9 @@ public class AlbumService {
     private final ArtistRepository artistRepo;
     private final AlbumMapper albumMapper;
 
-    public AlbumResponseDto createAlbum(AlbumRequestDto dto) {
+    public AlbumResponseDto createAlbum(AlbumCreateDto dto) {
         try {
-            Artist artist = artistRepo.findById(dto.getArtistId())
+            Artist artist = artistRepo.findByIdAndDeletedFalse(dto.getArtistId())
                     .orElseThrow(() -> new NotFoundException("Artist not found with ID: " + dto.getArtistId()));
 
             Album album = albumMapper.toEntity(dto);
@@ -42,12 +42,51 @@ public class AlbumService {
     }
 
     public AlbumResponseDto getAlbum(UUID id) {
-        Album album = albumRepo.findById(id)
+        Album album = albumRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Album not found with ID: " + id));
         return albumMapper.toDto(album);
     }
 
     public List<AlbumResponseDto> getAll() {
-        return albumMapper.toDto(albumRepo.findAll());
+        return albumMapper.toDto(albumRepo.findAllByDeletedFalse());
+    }
+
+    public AlbumResponseDto updateAlbum(UUID id, com.jasondt.musicservice.dto.AlbumUpdateDto dto) {
+        Album album = albumRepo.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Album not found with ID: " + id));
+        try {
+            if (dto.getTitle() != null) {
+                album.setTitle(dto.getTitle());
+            }
+            if (dto.getReleaseDate() != null) {
+                album.setReleaseDate(dto.getReleaseDate());
+            }
+            if (dto.getArtistId() != null) {
+                Artist artist = artistRepo.findByIdAndDeletedFalse(dto.getArtistId())
+                        .orElseThrow(() -> new NotFoundException("Artist not found with ID: " + dto.getArtistId()));
+                album.setArtist(artist);
+            }
+            if(dto.getReleaseDate() != null) {
+
+            }
+            if (dto.getImage() != null) {
+                String img = dto.getImage();
+                album.setImage(img);
+            }
+            return albumMapper.toDto(albumRepo.save(album));
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to update album", e);
+        }
+    }
+
+    public void deleteAlbum(UUID id) {
+        Album album = albumRepo.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Cannot delete. Album not found with ID: " + id));
+        try {
+            album.setDeleted(true);
+            albumRepo.save(album);
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to delete album", e);
+        }
     }
 }

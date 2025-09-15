@@ -1,6 +1,6 @@
 package com.jasondt.musicservice.service;
 
-import com.jasondt.musicservice.dto.ArtistRequestDto;
+import com.jasondt.musicservice.dto.ArtistCreateDto;
 import com.jasondt.musicservice.dto.ArtistResponseDto;
 import com.jasondt.musicservice.exception.DatabaseException;
 import com.jasondt.musicservice.exception.NotFoundException;
@@ -24,9 +24,9 @@ public class ArtistService {
     private final GenreRepository genreRepo;
     private final ArtistMapper artistMapper;
 
-    public ArtistResponseDto createArtist(ArtistRequestDto dto) {
+    public ArtistResponseDto createArtist(ArtistCreateDto dto) {
         try {
-            Genre genre = genreRepo.findById(dto.getGenreId())
+            Genre genre = genreRepo.findByIdAndDeletedFalse(dto.getGenreId())
                     .orElseThrow(() -> new NotFoundException("Genre not found with ID: " + dto.getGenreId()));
 
             Artist artist = artistMapper.toEntity(dto);
@@ -39,21 +39,43 @@ public class ArtistService {
     }
 
     public ArtistResponseDto getArtist(UUID id) {
-        Artist artist = artistRepo.findById(id)
+        Artist artist = artistRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Artist not found with ID: " + id));
         return artistMapper.toDto(artist);
     }
 
+    public ArtistResponseDto updateArtist(UUID id, com.jasondt.musicservice.dto.ArtistUpdateDto dto) {
+        Artist artist = artistRepo.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Artist not found with ID: " + id));
+        try {
+            if (dto.getName() != null) {
+                artist.setName(dto.getName());
+            }
+            if (dto.getGenreId() != null) {
+                Genre genre = genreRepo.findByIdAndDeletedFalse(dto.getGenreId())
+                        .orElseThrow(() -> new NotFoundException("Genre not found with ID: " + dto.getGenreId()));
+                artist.setGenre(genre);
+            }
+            if (dto.getImage() != null) {
+                String img = dto.getImage();
+                artist.setImage(img);
+            }
+            return artistMapper.toDto(artistRepo.save(artist));
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to update artist", e);
+        }
+    }
+
     public List<ArtistResponseDto> getAll() {
-        return artistMapper.toDto(artistRepo.findAll());
+        return artistMapper.toDto(artistRepo.findAllByDeletedFalse());
     }
 
     public void deleteArtist(UUID id) {
-        if (!artistRepo.existsById(id)) {
-            throw new NotFoundException("Cannot delete. Artist not found with ID: " + id);
-        }
+        Artist artist = artistRepo.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Cannot delete. Artist not found with ID: " + id));
         try {
-            artistRepo.deleteById(id);
+            artist.setDeleted(true);
+            artistRepo.save(artist);
         } catch (DataAccessException e) {
             throw new DatabaseException("Failed to delete artist", e);
         }

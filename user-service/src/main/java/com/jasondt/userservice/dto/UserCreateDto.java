@@ -1,0 +1,13 @@
+package com.jasondt.userservice.dto;
+
+import lombok.Data;
+
+import java.util.Date;
+
+@Data
+public class UserCreateDto {
+    private String name;
+    private Date birthday;
+    private String gender;
+}
+

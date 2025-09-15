@@ -2,10 +2,8 @@ package com.jasondt.musicservice.dto;
 
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
-public class ArtistRequestDto {
+public class GenreUpdateDto {
     private String name;
-    private UUID genreId;
 }
+

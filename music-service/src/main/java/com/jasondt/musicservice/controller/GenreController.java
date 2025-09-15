@@ -1,8 +1,9 @@
 package com.jasondt.musicservice.controller;
 
-import com.jasondt.musicservice.dto.GenreRequestDto;
+import com.jasondt.musicservice.dto.GenreCreateDto;
 import com.jasondt.musicservice.dto.GenreResponseDto;
 import com.jasondt.musicservice.service.GenreService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,11 +16,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/genres")
 @AllArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class GenreController {
     private final GenreService service;
 
     @PostMapping
-    public ResponseEntity<GenreResponseDto> create(@RequestBody @Valid GenreRequestDto dto) {
+    public ResponseEntity<GenreResponseDto> create(@RequestBody @Valid GenreCreateDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
@@ -31,6 +33,12 @@ public class GenreController {
     @GetMapping("/{id}")
     public ResponseEntity<GenreResponseDto> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<GenreResponseDto> update(@PathVariable UUID id,
+                                                   @RequestBody @Valid com.jasondt.musicservice.dto.GenreUpdateDto dto) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
     @DeleteMapping("/{id}")

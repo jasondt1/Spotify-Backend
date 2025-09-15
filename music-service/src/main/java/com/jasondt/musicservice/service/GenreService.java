@@ -1,6 +1,6 @@
 package com.jasondt.musicservice.service;
 
-import com.jasondt.musicservice.dto.GenreRequestDto;
+import com.jasondt.musicservice.dto.GenreCreateDto;
 import com.jasondt.musicservice.dto.GenreResponseDto;
 import com.jasondt.musicservice.exception.DatabaseException;
 import com.jasondt.musicservice.exception.NotFoundException;
@@ -21,7 +21,7 @@ public class GenreService {
     private final GenreRepository genreRepo;
     private final GenreMapper genreMapper;
 
-    public GenreResponseDto create(GenreRequestDto dto) {
+    public GenreResponseDto create(GenreCreateDto dto) {
         try {
             Genre genre = genreMapper.toEntity(dto);
             return genreMapper.toResponseDto(genreRepo.save(genre));
@@ -31,21 +31,32 @@ public class GenreService {
     }
 
     public List<GenreResponseDto> getAll() {
-        return genreMapper.toResponseDto(genreRepo.findAll());
+        return genreMapper.toResponseDto(genreRepo.findAllByDeletedFalse());
     }
 
     public GenreResponseDto getById(UUID id) {
-        Genre genre = genreRepo.findById(id)
+        Genre genre = genreRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Genre not found with ID: " + id));
         return genreMapper.toResponseDto(genre);
     }
 
-    public void delete(UUID id) {
-        if (!genreRepo.existsById(id)) {
-            throw new NotFoundException("Cannot delete. Genre not found with ID: " + id);
-        }
+    public GenreResponseDto update(UUID id, com.jasondt.musicservice.dto.GenreUpdateDto dto) {
+        Genre genre = genreRepo.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Genre not found with ID: " + id));
         try {
-            genreRepo.deleteById(id);
+            genre.setName(dto.getName());
+            return genreMapper.toResponseDto(genreRepo.save(genre));
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to update genre", e);
+        }
+    }
+
+    public void delete(UUID id) {
+        Genre genre = genreRepo.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Cannot delete. Genre not found with ID: " + id));
+        try {
+            genre.setDeleted(true);
+            genreRepo.save(genre);
         } catch (DataAccessException e) {
             throw new DatabaseException("Failed to delete genre", e);
         }

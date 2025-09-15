@@ -1,15 +1,41 @@
 package com.jasondt.musicservice.mapper;
 
-import com.jasondt.musicservice.dto.TrackRequestDto;
+import com.jasondt.musicservice.dto.ArtistSimpleDto;
+import com.jasondt.musicservice.dto.TrackCreateDto;
 import com.jasondt.musicservice.dto.TrackResponseDto;
+import com.jasondt.musicservice.model.Artist;
 import com.jasondt.musicservice.model.Track;
-import org.mapstruct.Mapper;
+import org.mapstruct.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface TrackMapper {
-    TrackResponseDto toDto(Track entity);
-    List<TrackResponseDto> toDto(List<Track> entityList);
-    Track toEntity(TrackRequestDto dto);
+public abstract class TrackMapper {
+
+    public abstract TrackResponseDto toDto(Track entity);
+    public abstract List<TrackResponseDto> toDto(List<Track> entityList);
+    public abstract Track toEntity(TrackCreateDto dto);
+
+    protected abstract ArtistSimpleDto toDto(Artist entity);
+
+    @AfterMapping
+    protected void mapArtists(Track entity, @MappingTarget TrackResponseDto dto) {
+        if (entity == null) return;
+        List<ArtistSimpleDto> list = new ArrayList<>();
+        if (entity.getArtist() != null && !entity.getArtist().isDeleted()) {
+            list.add(toDto(entity.getArtist()));
+        }
+        if (entity.getOtherArtists() != null) {
+            for (Artist a : entity.getOtherArtists()) {
+                if (a != null && !a.isDeleted()) {
+                    if (entity.getArtist() != null && a.getId() != null && a.getId().equals(entity.getArtist().getId())) {
+                        continue;
+                    }
+                    list.add(toDto(a));
+                }
+            }
+        }
+        dto.setArtists(list);
+    }
 }
