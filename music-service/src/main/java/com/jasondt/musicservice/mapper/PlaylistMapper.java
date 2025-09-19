@@ -1,9 +1,11 @@
 package com.jasondt.musicservice.mapper;
 
 import com.jasondt.musicservice.dto.PlaylistResponseDto;
+import com.jasondt.musicservice.dto.TrackResponseDto;
 import com.jasondt.musicservice.model.Playlist;
 import com.jasondt.musicservice.model.PlaylistTrack;
 import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +14,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = { TrackMapper.class })
 public abstract class PlaylistMapper {
 
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     protected TrackMapper trackMapper;
 
     public abstract PlaylistResponseDto toDto(Playlist entity);
@@ -21,10 +23,20 @@ public abstract class PlaylistMapper {
     @AfterMapping
     protected void mapTracks(Playlist entity, @MappingTarget PlaylistResponseDto dto) {
         if (entity == null || entity.getTracks() == null) return;
-        List<PlaylistTrack> pts = entity.getTracks().stream()
-                .sorted(Comparator.comparing(pt -> pt.getPosition() == null ? Integer.MAX_VALUE : pt.getPosition()))
+
+        List<TrackResponseDto> tracks = entity.getTracks().stream()
+                .sorted(Comparator.comparing(
+                        pt -> pt.getPosition() == null ? Integer.MAX_VALUE : pt.getPosition()
+                ))
+                .map(pt -> {
+                    TrackResponseDto trackDto = trackMapper.toDto(pt.getTrack());
+                    trackDto.setCreatedAt(pt.getCreatedAt());
+                    return trackDto;
+                })
                 .collect(Collectors.toList());
-        dto.setTracks(pts.stream().map(pt -> trackMapper.toDto(pt.getTrack())).collect(Collectors.toList()));
+
+        dto.setTracks(tracks);
     }
+
 }
 

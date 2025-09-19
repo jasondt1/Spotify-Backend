@@ -2,6 +2,7 @@ package com.jasondt.musicservice.controller;
 
 import com.jasondt.musicservice.dto.*;
 import com.jasondt.musicservice.service.PlaylistService;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -21,9 +22,10 @@ public class PlaylistController {
     private final PlaylistService service;
 
     @PostMapping
-    public ResponseEntity<PlaylistResponseDto> create(@RequestHeader("X-User-Id") UUID ownerId,
-                                                      @RequestBody @Valid PlaylistCreateDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(ownerId, dto));
+    public ResponseEntity<PlaylistResponseDto> create(
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId,
+            @RequestBody @Valid PlaylistCreateDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(userId, dto));
     }
 
     @GetMapping("/{id}")
@@ -32,35 +34,41 @@ public class PlaylistController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<PlaylistResponseDto>> mine(@RequestHeader("X-User-Id") UUID ownerId) {
-        return ResponseEntity.ok(service.getMine(ownerId));
+    public ResponseEntity<List<PlaylistResponseDto>> mine(
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId) {
+        return ResponseEntity.ok(service.getMine(userId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PlaylistResponseDto> update(@PathVariable UUID id,
-                                                      @RequestHeader("X-User-Id") UUID ownerId,
-                                                      @RequestBody @Valid PlaylistUpdateDto dto) {
-        return ResponseEntity.ok(service.update(id, ownerId, dto));
+    public ResponseEntity<PlaylistResponseDto> update(
+            @PathVariable UUID id,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId,
+            @RequestBody @Valid PlaylistUpdateDto dto) {
+        return ResponseEntity.ok(service.update(id, userId, dto));
     }
 
-    @PostMapping("/{id}/tracks")
-    public ResponseEntity<PlaylistResponseDto> addTrack(@PathVariable UUID id,
-                                                        @RequestHeader("X-User-Id") UUID ownerId,
-                                                        @RequestBody @Valid PlaylistAddTracksDto dto) {
-        return ResponseEntity.ok(service.addTracks(id, ownerId, dto.getTrackId()));
+    @PostMapping("/{id}/tracks/{trackId}")
+    public ResponseEntity<PlaylistResponseDto> addTrack(
+            @PathVariable UUID id,
+            @PathVariable UUID trackId,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId) {
+        return ResponseEntity.ok(service.addTracks(id, userId, trackId));
     }
 
     @DeleteMapping("/{id}/tracks/{trackId}")
-    public ResponseEntity<Void> removeTrack(@PathVariable UUID id,
-                                            @RequestHeader("X-User-Id") UUID ownerId,
-                                            @PathVariable UUID trackId) {
-        service.removeTrack(id, ownerId, trackId);
+    public ResponseEntity<Void> removeTrack(
+            @PathVariable UUID id,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId,
+            @PathVariable UUID trackId) {
+        service.removeTrack(id, userId, trackId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id, @RequestHeader("X-User-Id") UUID ownerId) {
-        service.delete(id, ownerId);
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID id,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId) {
+        service.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

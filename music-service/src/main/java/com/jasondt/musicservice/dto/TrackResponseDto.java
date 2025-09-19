@@ -13,6 +13,7 @@ public class TrackResponseDto {
     private int duration;
     private String audio;
     private List<ArtistSimpleDto> artists;
+    private AlbumSimpleDto album;
     private Instant createdAt;
     private Instant updatedAt;
 }

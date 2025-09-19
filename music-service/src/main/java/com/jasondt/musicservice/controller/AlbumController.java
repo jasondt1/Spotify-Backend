@@ -2,6 +2,7 @@ package com.jasondt.musicservice.controller;
 
 import com.jasondt.musicservice.dto.AlbumCreateDto;
 import com.jasondt.musicservice.dto.AlbumResponseDto;
+import com.jasondt.musicservice.dto.AlbumUpdateDto;
 import com.jasondt.musicservice.service.AlbumService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -32,7 +33,7 @@ public class AlbumController {
 
     @PutMapping("/{id}")
     public ResponseEntity<AlbumResponseDto> update(@PathVariable UUID id,
-                                                   @RequestBody @Valid com.jasondt.musicservice.dto.AlbumUpdateDto dto) {
+                                                   @RequestBody @Valid AlbumUpdateDto dto) {
         return ResponseEntity.ok(service.updateAlbum(id, dto));
     }
 

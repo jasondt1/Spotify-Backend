@@ -1,5 +1,6 @@
 package com.jasondt.userservice.controller;
 
+import com.jasondt.userservice.dto.UserCreateDto;
 import com.jasondt.userservice.dto.UserRequestDto;
 import com.jasondt.userservice.dto.UserResponseDto;
 import com.jasondt.userservice.service.UserService;
@@ -24,7 +25,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody com.jasondt.userservice.dto.UserCreateDto userDto) {
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserCreateDto userDto) {
         return new ResponseEntity<>(userService.createUser(userDto), HttpStatus.CREATED);
     }
 
@@ -45,7 +46,6 @@ public class UserController {
     public ResponseEntity<UserResponseDto> getMe(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId
     ) {
-        System.out.println(  " lll: " + userId);
         return userService.getUserById(userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

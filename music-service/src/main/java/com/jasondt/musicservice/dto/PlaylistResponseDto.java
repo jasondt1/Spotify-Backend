@@ -16,5 +16,6 @@ public class PlaylistResponseDto {
     private List<TrackResponseDto> tracks;
     private Instant createdAt;
     private Instant updatedAt;
+    private UserResponseDto owner;
 }
 

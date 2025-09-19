@@ -2,6 +2,7 @@ package com.jasondt.musicservice.service;
 
 import com.jasondt.musicservice.dto.TrackCreateDto;
 import com.jasondt.musicservice.dto.TrackResponseDto;
+import com.jasondt.musicservice.dto.TrackUpdateDto;
 import com.jasondt.musicservice.exception.DatabaseException;
 import com.jasondt.musicservice.exception.NotFoundException;
 import com.jasondt.musicservice.mapper.TrackMapper;
@@ -16,7 +17,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -39,8 +42,8 @@ public class TrackService {
             track.setArtist(artist);
 
             if (dto.getArtistIds() != null && !dto.getArtistIds().isEmpty()) {
-                java.util.List<Artist> others = new java.util.ArrayList<>();
-                for (java.util.UUID aid : dto.getArtistIds()) {
+                List<Artist> others = new ArrayList<>();
+                for (UUID aid : dto.getArtistIds()) {
                     Artist a = artistRepo.findByIdAndDeletedFalse(aid)
                             .orElseThrow(() -> new NotFoundException("Artist not found with ID: " + aid));
                     if (a.getId().equals(artist.getId())) continue;
@@ -62,7 +65,7 @@ public class TrackService {
         return trackMapper.toDto(trackRepo.findAllByDeletedFalse());
     }
 
-    public TrackResponseDto updateTrack(java.util.UUID id, com.jasondt.musicservice.dto.TrackUpdateDto dto) {
+    public TrackResponseDto updateTrack(UUID id, TrackUpdateDto dto) {
         Track track = trackRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Track not found with ID: " + id));
         try {
@@ -83,9 +86,9 @@ public class TrackService {
                 track.setArtist(album.getArtist());
             }
             if (dto.getArtistIds() != null) {
-                java.util.List<Artist> others = new java.util.ArrayList<>();
+                List<Artist> others = new ArrayList<>();
                 Artist primary = track.getArtist();
-                for (java.util.UUID aid : dto.getArtistIds()) {
+                for (UUID aid : dto.getArtistIds()) {
                     Artist a = artistRepo.findByIdAndDeletedFalse(aid)
                             .orElseThrow(() -> new NotFoundException("Artist not found with ID: " + aid));
                     if (primary != null && a.getId().equals(primary.getId())) continue;
@@ -101,7 +104,7 @@ public class TrackService {
         }
     }
 
-    public void deleteTrack(java.util.UUID id) {
+    public void deleteTrack(UUID id) {
         Track track = trackRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Cannot delete. Track not found with ID: " + id));
         try {

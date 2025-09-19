@@ -1,7 +1,9 @@
 package com.jasondt.musicservice.service;
 
+import com.jasondt.musicservice.client.UserClient;
 import com.jasondt.musicservice.dto.*;
 import com.jasondt.musicservice.exception.DatabaseException;
+import com.jasondt.musicservice.exception.DuplicateTrackException;
 import com.jasondt.musicservice.exception.NotFoundException;
 import com.jasondt.musicservice.mapper.PlaylistMapper;
 import com.jasondt.musicservice.model.Playlist;
@@ -25,6 +27,8 @@ public class PlaylistService {
     private final PlaylistTrackRepository playlistTrackRepo;
     private final TrackRepository trackRepo;
     private final PlaylistMapper playlistMapper;
+    private final UserClient userClient;
+    private final LibraryService libraryService;
 
     @Transactional
     public PlaylistResponseDto create(UUID ownerId, PlaylistCreateDto dto) {
@@ -47,21 +51,51 @@ public class PlaylistService {
                 }
             }
 
-            return playlistMapper.toDto(playlistRepo.save(playlist));
+            Playlist saved = playlistRepo.save(playlist);
+            // auto-add to owner's library (best-effort)
+            try { libraryService.addPlaylist(ownerId, saved.getId()); } catch (Exception ignore) {}
+            return playlistMapper.toDto(saved);
         } catch (DataAccessException e) {
             throw new DatabaseException("Failed to create playlist", e);
         }
     }
 
+    
+
     public PlaylistResponseDto getById(UUID id) {
         Playlist p = playlistRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Playlist not found with ID: " + id));
-        return playlistMapper.toDto(p);
+
+        PlaylistResponseDto dto = playlistMapper.toDto(p);
+
+        try {
+            UserResponseDto user = userClient.getUserById(p.getOwnerId());
+            dto.setOwner(user);
+        } catch (Exception e) {
+            dto.setOwner(null);
+        }
+
+        return dto;
     }
 
     public List<PlaylistResponseDto> getMine(UUID ownerId) {
-        return playlistMapper.toDto(playlistRepo.findAllByOwnerIdAndDeletedFalse(ownerId));
+        List<Playlist> playlists = playlistRepo.findAllByOwnerIdAndDeletedFalse(ownerId);
+        List<PlaylistResponseDto> dtos = playlistMapper.toDto(playlists);
+
+        try {
+            UserResponseDto user = userClient.getUserById(ownerId);
+            for (PlaylistResponseDto dto : dtos) {
+                dto.setOwner(user);
+            }
+        } catch (Exception e) {
+            for (PlaylistResponseDto dto : dtos) {
+                dto.setOwner(null);
+            }
+        }
+
+        return dtos;
     }
+
 
     @Transactional
     public PlaylistResponseDto update(UUID id, UUID ownerId, PlaylistUpdateDto dto) {
@@ -103,6 +137,12 @@ public class PlaylistService {
             throw new NotFoundException("Playlist not found with ID: " + id);
         }
         try {
+            boolean exists = p.getTracks() != null && p.getTracks().stream()
+                    .anyMatch(pt -> pt.getTrack().getId().equals(trackId));
+            if (exists) {
+                throw new DuplicateTrackException("Track already exists in playlist");
+            }
+
             int nextPos = p.getTracks() == null ? 0 : p.getTracks().size();
             Track track = trackRepo.findByIdAndDeletedFalse(trackId)
                     .orElseThrow(() -> new NotFoundException("Track not found with ID: " + trackId));

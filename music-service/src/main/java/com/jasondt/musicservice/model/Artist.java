@@ -37,6 +37,9 @@ public class Artist {
     @Column(name = "image", columnDefinition = "text")
     private String image;
 
+    @Column(name = "cover_image", columnDefinition = "text")
+    private String coverImage;
+
     @OneToMany(mappedBy = "artist", cascade = CascadeType.ALL, orphanRemoval = true)
     @Where(clause = "deleted = false")
     private List<Track> tracks = new ArrayList<>();

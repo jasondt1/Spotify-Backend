@@ -14,6 +14,7 @@ public class ArtistResponseDto {
     private List<AlbumResponseDto> albums;
     private List<TrackResponseDto> tracks;
     private String image;
+    private String coverImage;
     private Instant createdAt;
     private Instant updatedAt;
 }

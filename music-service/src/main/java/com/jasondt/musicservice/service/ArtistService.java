@@ -2,6 +2,7 @@ package com.jasondt.musicservice.service;
 
 import com.jasondt.musicservice.dto.ArtistCreateDto;
 import com.jasondt.musicservice.dto.ArtistResponseDto;
+import com.jasondt.musicservice.dto.ArtistUpdateDto;
 import com.jasondt.musicservice.exception.DatabaseException;
 import com.jasondt.musicservice.exception.NotFoundException;
 import com.jasondt.musicservice.mapper.ArtistMapper;
@@ -44,7 +45,7 @@ public class ArtistService {
         return artistMapper.toDto(artist);
     }
 
-    public ArtistResponseDto updateArtist(UUID id, com.jasondt.musicservice.dto.ArtistUpdateDto dto) {
+    public ArtistResponseDto updateArtist(UUID id, ArtistUpdateDto dto) {
         Artist artist = artistRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Artist not found with ID: " + id));
         try {
@@ -59,6 +60,9 @@ public class ArtistService {
             if (dto.getImage() != null) {
                 String img = dto.getImage();
                 artist.setImage(img);
+            }
+            if (dto.getCoverImage() != null) {
+                artist.setCoverImage(dto.getCoverImage());
             }
             return artistMapper.toDto(artistRepo.save(artist));
         } catch (DataAccessException e) {

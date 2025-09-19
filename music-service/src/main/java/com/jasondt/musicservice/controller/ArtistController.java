@@ -1,8 +1,8 @@
 package com.jasondt.musicservice.controller;
 
-import com.jasondt.musicservice.dto.ArtistCreateDto;
-import com.jasondt.musicservice.dto.ArtistResponseDto;
+import com.jasondt.musicservice.dto.*;
 import com.jasondt.musicservice.service.ArtistService;
+import com.jasondt.musicservice.service.HistoryService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -19,6 +19,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "BearerAuth")
 public class ArtistController {
     private final ArtistService service;
+    private final HistoryService historyService;
 
     @PostMapping
     public ResponseEntity<ArtistResponseDto> create(@RequestBody @Valid ArtistCreateDto dto) {
@@ -32,7 +33,7 @@ public class ArtistController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ArtistResponseDto> update(@PathVariable UUID id,
-                                                    @RequestBody @Valid com.jasondt.musicservice.dto.ArtistUpdateDto dto) {
+                                                    @RequestBody @Valid ArtistUpdateDto dto) {
         return ResponseEntity.ok(service.updateArtist(id, dto));
     }
 
@@ -46,4 +47,18 @@ public class ArtistController {
         service.deleteArtist(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<ArtistCompleteDetailsDto> getCompleteDetails(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        ArtistResponseDto artist = service.getArtist(id);
+        List<TopTrackDto> topTracks = historyService.getTopTracksForArtist(id, limit);
+        Long monthlyListeners = historyService.getArtistMonthlyListeners(id);
+
+        ArtistCompleteDetailsDto dto = new ArtistCompleteDetailsDto(artist, topTracks, monthlyListeners);
+        return ResponseEntity.ok(dto);
+    }
+
 }

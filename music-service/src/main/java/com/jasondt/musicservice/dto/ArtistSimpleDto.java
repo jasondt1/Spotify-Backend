@@ -11,6 +11,7 @@ public class ArtistSimpleDto {
     private String name;
     private GenreResponseDto genre;
     private String image;
+    private String coverImage;
     private Instant createdAt;
     private Instant updatedAt;
 }

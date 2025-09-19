@@ -9,4 +9,5 @@ public class ArtistCreateDto {
     private String name;
     private UUID genreId;
     private String image;
+    private String coverImage;
 }

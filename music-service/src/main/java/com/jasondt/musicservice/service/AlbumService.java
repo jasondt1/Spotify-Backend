@@ -2,6 +2,7 @@ package com.jasondt.musicservice.service;
 
 import com.jasondt.musicservice.dto.AlbumCreateDto;
 import com.jasondt.musicservice.dto.AlbumResponseDto;
+import com.jasondt.musicservice.dto.AlbumUpdateDto;
 import com.jasondt.musicservice.exception.DatabaseException;
 import com.jasondt.musicservice.exception.NotFoundException;
 import com.jasondt.musicservice.mapper.AlbumMapper;
@@ -51,7 +52,7 @@ public class AlbumService {
         return albumMapper.toDto(albumRepo.findAllByDeletedFalse());
     }
 
-    public AlbumResponseDto updateAlbum(UUID id, com.jasondt.musicservice.dto.AlbumUpdateDto dto) {
+    public AlbumResponseDto updateAlbum(UUID id, AlbumUpdateDto dto) {
         Album album = albumRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Album not found with ID: " + id));
         try {

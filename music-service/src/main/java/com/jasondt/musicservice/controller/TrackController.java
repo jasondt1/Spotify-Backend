@@ -2,6 +2,7 @@ package com.jasondt.musicservice.controller;
 
 import com.jasondt.musicservice.dto.TrackCreateDto;
 import com.jasondt.musicservice.dto.TrackResponseDto;
+import com.jasondt.musicservice.dto.TrackUpdateDto;
 import com.jasondt.musicservice.service.TrackService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -32,7 +33,7 @@ public class TrackController {
 
     @PutMapping("/{id}")
     public ResponseEntity<TrackResponseDto> update(@PathVariable UUID id,
-                                                   @RequestBody @Valid com.jasondt.musicservice.dto.TrackUpdateDto dto) {
+                                                   @RequestBody @Valid TrackUpdateDto dto) {
         return ResponseEntity.ok(service.updateTrack(id, dto));
     }
 

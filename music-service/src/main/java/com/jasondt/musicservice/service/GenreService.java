@@ -2,6 +2,7 @@ package com.jasondt.musicservice.service;
 
 import com.jasondt.musicservice.dto.GenreCreateDto;
 import com.jasondt.musicservice.dto.GenreResponseDto;
+import com.jasondt.musicservice.dto.GenreUpdateDto;
 import com.jasondt.musicservice.exception.DatabaseException;
 import com.jasondt.musicservice.exception.NotFoundException;
 import com.jasondt.musicservice.mapper.GenreMapper;
@@ -40,7 +41,7 @@ public class GenreService {
         return genreMapper.toResponseDto(genre);
     }
 
-    public GenreResponseDto update(UUID id, com.jasondt.musicservice.dto.GenreUpdateDto dto) {
+    public GenreResponseDto update(UUID id, GenreUpdateDto dto) {
         Genre genre = genreRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Genre not found with ID: " + id));
         try {

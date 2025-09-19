@@ -9,5 +9,5 @@ public class ArtistUpdateDto {
     private String name;
     private UUID genreId;
     private String image;
+    private String coverImage;
 }
-

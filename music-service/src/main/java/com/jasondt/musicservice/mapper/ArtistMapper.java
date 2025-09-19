@@ -7,7 +7,6 @@ import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", uses = { AlbumMapper.class })
 public abstract class ArtistMapper {

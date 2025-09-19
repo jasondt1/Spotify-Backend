@@ -1,14 +1,13 @@
 package com.jasondt.musicservice.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Where;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,6 +45,9 @@ public class Track {
             inverseJoinColumns = @JoinColumn(name = "artist_id")
     )
     private java.util.List<Artist> otherArtists = new java.util.ArrayList<>();
+
+    @OneToMany(mappedBy = "track")
+    private List<History> histories = new ArrayList<>();
 
     @Column(columnDefinition = "boolean not null default false")
     private boolean deleted = false;

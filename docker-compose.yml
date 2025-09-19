@@ -62,6 +62,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://music-db:5432/musicdb
       SPRING_DATASOURCE_USERNAME: music
       SPRING_DATASOURCE_PASSWORD: pass
+      USER_SERVICE_URL: http://user-service:8081/api/users
     ports:
       - "8083:8083"
     networks:

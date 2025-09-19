@@ -1,5 +1,6 @@
 package com.jasondt.musicservice.mapper;
 
+import com.jasondt.musicservice.dto.AlbumSimpleDto;
 import com.jasondt.musicservice.dto.ArtistSimpleDto;
 import com.jasondt.musicservice.dto.TrackCreateDto;
 import com.jasondt.musicservice.dto.TrackResponseDto;
@@ -37,5 +38,13 @@ public abstract class TrackMapper {
             }
         }
         dto.setArtists(list);
+        if (entity.getAlbum() != null) {
+            AlbumSimpleDto a = new AlbumSimpleDto();
+            a.setId(entity.getAlbum().getId());
+            a.setTitle(entity.getAlbum().getTitle());
+            a.setImage(entity.getAlbum().getImage());
+            a.setReleaseDate(entity.getAlbum().getReleaseDate());
+            dto.setAlbum(a);
+        }
     }
 }

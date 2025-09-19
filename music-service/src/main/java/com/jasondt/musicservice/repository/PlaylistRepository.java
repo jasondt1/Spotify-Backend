@@ -10,5 +10,5 @@ import java.util.UUID;
 public interface PlaylistRepository extends JpaRepository<Playlist, UUID> {
     Optional<Playlist> findByIdAndDeletedFalse(UUID id);
     List<Playlist> findAllByOwnerIdAndDeletedFalse(UUID ownerId);
+    List<Playlist> findTop10ByDeletedFalseAndNameContainingIgnoreCase(String name);
 }
-
