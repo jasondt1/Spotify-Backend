@@ -12,4 +12,5 @@ public class TrackCreateDto {
     private String audio;
     private UUID albumId;
     private List<UUID> artistIds;
+    private List<LyricsLineDto> lyrics;
 }

@@ -1,36 +1,33 @@
-package com.jasondt.userservice.model;
+package com.jasondt.musicservice.model;
 
 import jakarta.persistence.*;
-import java.time.Instant;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Table(name = "lyrics_lines")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
-public class User {
+public class LyricsLine {
+
     @Id
+    @GeneratedValue
     private UUID id;
 
-    private String name;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "track_id")
+    private Track track;
 
-    private Date birthday;
+    @Column(name = "timestamp_sec", nullable = false)
+    private Integer timestamp;
 
-    private String gender;
-
-    @Column(columnDefinition = "boolean not null default false")
-    private boolean deleted = false;
-
-    @Column(name = "profile_picture", length = 500)
-    private String profilePicture;
+    @Column(name = "text", columnDefinition = "text", nullable = false)
+    private String text;
 
     @Column(name = "created_at", columnDefinition = "timestamp with time zone not null default now()", updatable = false)
     private Instant createdAt;
@@ -50,3 +47,4 @@ public class User {
         this.updatedAt = Instant.now();
     }
 }
+

@@ -1,7 +1,6 @@
 package com.jasondt.musicservice.controller;
 
-import com.jasondt.musicservice.dto.HistoryResponseDto;
-import com.jasondt.musicservice.dto.PlayCountResponseDto;
+import com.jasondt.musicservice.dto.*;
 import com.jasondt.musicservice.service.HistoryService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -31,7 +30,35 @@ public class HistoryController {
     public ResponseEntity<List<HistoryResponseDto>> myHistory(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "50") int size) {
         return ResponseEntity.ok(service.getUserHistory(userId, page, size));
     }
+    @GetMapping("/users/{userId}/top-tracks")
+    public ResponseEntity<List<TopTrackDto>> userTopTracks(@PathVariable UUID userId) {
+        return ResponseEntity.ok(service.getUserTopTracksLast30(userId));
+    }
+
+    @GetMapping("/users/{userId}/top-artists")
+    public ResponseEntity<List<TopArtistDto>> userTopArtists(@PathVariable UUID userId) {
+        return ResponseEntity.ok(service.getUserTopArtistsLast30(userId, false));
+    }
+
+    @GetMapping("/top-tracks")
+    public ResponseEntity<List<TopTrackDto>> getTopTracksAllTime(
+            @RequestParam(defaultValue = "20") int limit) {
+        return ResponseEntity.ok(service.getTopTracksAllTime(limit));
+    }
+
+    @GetMapping("/top-artists")
+    public ResponseEntity<List<TopArtistDto>> getTopArtistsAllTime(
+            @RequestParam(defaultValue = "20") int limit) {
+        return ResponseEntity.ok(service.getTopArtistsAllTime(limit));
+    }
+
+    @GetMapping("/top-albums")
+    public ResponseEntity<List<AlbumResponseDto>> getAlbumsWithTopTracksAllTime(
+            @RequestParam(defaultValue = "20") int limit) {
+        return ResponseEntity.ok(service.getAlbumsWithTopTracksAllTime(limit));
+    }
+
 }

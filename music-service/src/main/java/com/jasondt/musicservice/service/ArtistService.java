@@ -71,7 +71,7 @@ public class ArtistService {
     }
 
     public List<ArtistResponseDto> getAll() {
-        return artistMapper.toDto(artistRepo.findAllByDeletedFalse());
+        return artistMapper.toDto(artistRepo.findAllByDeletedFalseOrderByCreatedAtAsc());
     }
 
     public void deleteArtist(UUID id) {

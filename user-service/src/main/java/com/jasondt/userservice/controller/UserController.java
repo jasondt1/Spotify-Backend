@@ -1,19 +1,16 @@
 package com.jasondt.userservice.controller;
 
 import com.jasondt.userservice.dto.UserCreateDto;
-import com.jasondt.userservice.dto.UserRequestDto;
 import com.jasondt.userservice.dto.UserResponseDto;
 import com.jasondt.userservice.service.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController

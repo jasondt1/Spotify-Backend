@@ -71,4 +71,17 @@ public class PlaylistController {
         service.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/albums/{albumId}")
+    public ResponseEntity<PlaylistResponseDto> addAlbum(
+            @PathVariable UUID id,
+            @PathVariable UUID albumId,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId) {
+        return ResponseEntity.ok(service.addAlbum(id, userId, albumId));
+    }
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<List<PlaylistResponseDto>> getByUserId(@PathVariable UUID userId) {
+        return ResponseEntity.ok(service.getByUserId(userId));
+    }
+
 }

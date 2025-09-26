@@ -14,6 +14,7 @@ public class TrackResponseDto {
     private String audio;
     private List<ArtistSimpleDto> artists;
     private AlbumSimpleDto album;
+    private List<LyricsLineDto> lyrics;
     private Instant createdAt;
     private Instant updatedAt;
 }

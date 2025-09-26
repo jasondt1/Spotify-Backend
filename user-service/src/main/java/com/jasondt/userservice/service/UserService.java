@@ -61,12 +61,15 @@ public class UserService {
                 if (dto.getName() != null) user.setName(dto.getName());
                 if (dto.getBirthday() != null) user.setBirthday(dto.getBirthday());
                 if (dto.getGender() != null) user.setGender(dto.getGender());
+                if (dto.getProfilePicture() != null) user.setProfilePicture(dto.getProfilePicture());
+
                 return userMapper.toDto(userRepository.save(user));
             });
         } catch (Exception e) {
             throw new DatabaseException("Failed to update user: " + e.getMessage(), e);
         }
     }
+
 
     public boolean deleteUser(UUID id) {
         try {

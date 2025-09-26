@@ -3,6 +3,7 @@ package com.jasondt.musicservice.controller;
 import com.jasondt.musicservice.dto.TrackCreateDto;
 import com.jasondt.musicservice.dto.TrackResponseDto;
 import com.jasondt.musicservice.dto.TrackUpdateDto;
+import com.jasondt.musicservice.dto.TrackWithPlayCountResponseDto;
 import com.jasondt.musicservice.service.TrackService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -41,6 +42,10 @@ public class TrackController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteTrack(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/{id}/with-plays")
+    public ResponseEntity<TrackWithPlayCountResponseDto> getWithPlays(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.getTrackWithPlayCount(id));
     }
 
 }

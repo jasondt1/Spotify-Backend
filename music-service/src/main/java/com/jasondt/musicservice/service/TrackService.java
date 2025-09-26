@@ -3,13 +3,16 @@ package com.jasondt.musicservice.service;
 import com.jasondt.musicservice.dto.TrackCreateDto;
 import com.jasondt.musicservice.dto.TrackResponseDto;
 import com.jasondt.musicservice.dto.TrackUpdateDto;
+import com.jasondt.musicservice.dto.TrackWithPlayCountResponseDto;
 import com.jasondt.musicservice.exception.DatabaseException;
 import com.jasondt.musicservice.exception.NotFoundException;
 import com.jasondt.musicservice.mapper.TrackMapper;
 import com.jasondt.musicservice.model.Album;
 import com.jasondt.musicservice.model.Artist;
+import com.jasondt.musicservice.model.LyricsLine;
 import com.jasondt.musicservice.model.Track;
 import com.jasondt.musicservice.repository.AlbumRepository;
+import com.jasondt.musicservice.repository.HistoryRepository;
 import com.jasondt.musicservice.repository.TrackRepository;
 import com.jasondt.musicservice.repository.ArtistRepository;
 import lombok.AllArgsConstructor;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +33,7 @@ public class TrackService {
     private final AlbumRepository albumRepo;
     private final TrackMapper trackMapper;
     private final ArtistRepository artistRepo;
+    private final HistoryRepository historyRepo;
 
     @Transactional
     public TrackResponseDto addTrack(TrackCreateDto dto) {
@@ -53,6 +58,8 @@ public class TrackService {
                 track.setOtherArtists(others);
             }
 
+            applyLyrics(track, dto.getLyrics());
+
             Track saved = trackRepo.save(track);
             album.addTrack(saved);
             return trackMapper.toDto(saved);
@@ -62,7 +69,7 @@ public class TrackService {
     }
 
     public List<TrackResponseDto> getAll() {
-        return trackMapper.toDto(trackRepo.findAllByDeletedFalse());
+        return trackMapper.toDto(trackRepo.findAllByDeletedFalseOrderByCreatedAtAsc());
     }
 
     public TrackResponseDto updateTrack(UUID id, TrackUpdateDto dto) {
@@ -97,11 +104,31 @@ public class TrackService {
                 }
                 track.setOtherArtists(others);
             }
+            applyLyrics(track, dto.getLyrics());
             Track saved = trackRepo.save(track);
             return trackMapper.toDto(saved);
         } catch (DataAccessException e) {
             throw new DatabaseException("Failed to update track", e);
         }
+    }
+
+    private void applyLyrics(Track track, List<com.jasondt.musicservice.dto.LyricsLineDto> lyricsDtos) {
+        if (lyricsDtos == null) return;
+        if (track.getLyrics() == null) {
+            track.setLyrics(new ArrayList<>());
+        } else {
+            track.getLyrics().clear();
+        }
+        lyricsDtos.stream()
+                .filter(l -> l != null && l.getText() != null && !l.getText().isBlank())
+                .sorted(Comparator.comparing(l -> l.getTimestamp() == null ? Integer.MAX_VALUE : l.getTimestamp()))
+                .forEach(l -> {
+                    LyricsLine line = new LyricsLine();
+                    line.setTrack(track);
+                    line.setTimestamp(l.getTimestamp() == null ? 0 : Math.max(0, l.getTimestamp()));
+                    line.setText(l.getText());
+                    track.getLyrics().add(line);
+                });
     }
 
     public void deleteTrack(UUID id) {
@@ -113,5 +140,13 @@ public class TrackService {
         } catch (DataAccessException e) {
             throw new DatabaseException("Failed to delete track", e);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public TrackWithPlayCountResponseDto getTrackWithPlayCount(UUID id) {
+        Track track = trackRepo.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Track not found with ID: " + id));
+        long plays = historyRepo.countByTrack_IdAndTrack_DeletedFalse(id);
+        return new TrackWithPlayCountResponseDto(trackMapper.toDto(track), plays);
     }
 }

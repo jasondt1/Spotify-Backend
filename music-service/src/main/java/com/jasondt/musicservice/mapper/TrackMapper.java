@@ -1,9 +1,6 @@
 package com.jasondt.musicservice.mapper;
 
-import com.jasondt.musicservice.dto.AlbumSimpleDto;
-import com.jasondt.musicservice.dto.ArtistSimpleDto;
-import com.jasondt.musicservice.dto.TrackCreateDto;
-import com.jasondt.musicservice.dto.TrackResponseDto;
+import com.jasondt.musicservice.dto.*;
 import com.jasondt.musicservice.model.Artist;
 import com.jasondt.musicservice.model.Track;
 import org.mapstruct.*;
@@ -45,6 +42,17 @@ public abstract class TrackMapper {
             a.setImage(entity.getAlbum().getImage());
             a.setReleaseDate(entity.getAlbum().getReleaseDate());
             dto.setAlbum(a);
+        }
+        if (entity.getLyrics() != null) {
+            java.util.List<LyricsLineDto> lyrics = new java.util.ArrayList<>();
+            for (com.jasondt.musicservice.model.LyricsLine line : entity.getLyrics()) {
+                if (line == null) continue;
+                LyricsLineDto ld = new LyricsLineDto();
+                ld.setTimestamp(line.getTimestamp());
+                ld.setText(line.getText());
+                lyrics.add(ld);
+            }
+            dto.setLyrics(lyrics);
         }
     }
 }

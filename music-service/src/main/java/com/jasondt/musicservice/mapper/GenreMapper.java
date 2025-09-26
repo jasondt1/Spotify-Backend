@@ -8,8 +8,8 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface GenreMapper {
-    GenreResponseDto toResponseDto(Genre entity);
-    List<GenreResponseDto> toResponseDto(List<Genre> entityList);
-    Genre toEntity(GenreCreateDto dto);
+public abstract class GenreMapper {
+    public abstract GenreResponseDto toResponseDto(Genre entity);
+    public abstract List<GenreResponseDto> toResponseDto(List<Genre> entityList);
+    public abstract Genre toEntity(GenreCreateDto dto);
 }

@@ -11,4 +11,5 @@ public class UserResponseDto {
     private String name;
     private Date birthday;
     private String gender;
+    private String profilePicture;
 }

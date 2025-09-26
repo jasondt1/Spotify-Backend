@@ -9,9 +9,9 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 @Mapper(componentModel = "spring", uses = { TrackMapper.class })
-public interface AlbumMapper {
-    AlbumResponseDto toDto(Album entity);
-    List<AlbumResponseDto> toDto(List<Album> entityList);
-    Album toEntity(AlbumCreateDto dto);
-    AlbumSimpleDto toSimpleDto(Album album);
+public abstract class AlbumMapper {
+    public abstract AlbumResponseDto toDto(Album entity);
+    public abstract List<AlbumResponseDto> toDto(List<Album> entityList);
+    public abstract Album toEntity(AlbumCreateDto dto);
+    public abstract AlbumSimpleDto toSimpleDto(Album album);
 }

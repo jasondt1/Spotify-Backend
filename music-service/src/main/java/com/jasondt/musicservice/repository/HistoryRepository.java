@@ -1,6 +1,10 @@
 package com.jasondt.musicservice.repository;
 
+import com.jasondt.musicservice.model.Album;
+import com.jasondt.musicservice.model.Artist;
 import com.jasondt.musicservice.model.History;
+import com.jasondt.musicservice.model.Track;
+import jakarta.persistence.Tuple;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,5 +36,96 @@ public interface HistoryRepository extends JpaRepository<History, UUID> {
         order by playCount desc
     """)
     List<TopTrackProjection> findTopTracksByArtist(@Param("artistId") UUID artistId, Pageable pageable);
+
+    @Query("""
+           select t from History h
+           join h.track t
+           where t.deleted = false
+           group by t
+           order by count(h) desc
+           """)
+    List<Track> findTopTracks(Pageable pageable);
+
+    @Query("""
+           select ar from History h
+           join h.track t
+           join t.artist ar
+           where t.deleted = false and ar.deleted = false
+           group by ar
+           order by count(h) desc
+           """)
+    List<Artist> findTopArtists(Pageable pageable);
+
+    @Query("""
+           select al from History h
+           join h.track t
+           join t.album al
+           where t.deleted = false and al.deleted = false
+           group by al
+           order by count(h) desc
+           """)
+    List<Album> findTopAlbums(Pageable pageable);
+
+    @Query("""
+        SELECT h.track.id AS trackId, COUNT(h) AS playCount
+        FROM History h
+        WHERE h.userId = :userId
+          AND h.playedAt >= :since
+          AND h.track.deleted = false
+        GROUP BY h.track.id
+        ORDER BY COUNT(h) DESC
+    """)
+    List<Tuple> findTopTracksForUserSince(
+            @Param("userId") UUID userId,
+            @Param("since") Instant since,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT h.track.artist.id AS artistId, COUNT(h) AS playCount
+        FROM History h
+        WHERE h.userId = :userId
+          AND h.playedAt >= :since
+          AND h.track.deleted = false
+          AND h.track.artist IS NOT NULL
+        GROUP BY h.track.artist.id
+        ORDER BY COUNT(h) DESC
+    """)
+    List<Tuple> findTopArtistsForUserSince(
+            @Param("userId") UUID userId,
+            @Param("since") Instant since,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT oa.id AS artistId, COUNT(h) AS playCount
+        FROM History h
+        JOIN h.track.otherArtists oa
+        WHERE h.userId = :userId
+          AND h.playedAt >= :since
+          AND h.track.deleted = false
+        GROUP BY oa.id
+        ORDER BY COUNT(h) DESC
+    """)
+    List<Tuple> findTopOtherArtistsForUserSince(
+            @Param("userId") UUID userId,
+            @Param("since") Instant since,
+            Pageable pageable
+    );
+
+    @Query("SELECT h.track.id as trackId, COUNT(h) as playCount " +
+            "FROM History h " +
+            "WHERE h.track.deleted = false " +
+            "GROUP BY h.track.id " +
+            "ORDER BY COUNT(h) DESC")
+    List<Tuple> findTopTracksAllTime(Pageable pageable);
+
+    @Query("SELECT h.track.artist.id as artistId, COUNT(h) as playCount " +
+            "FROM History h " +
+            "WHERE h.track.deleted = false AND h.track.artist IS NOT NULL " +
+            "GROUP BY h.track.artist.id " +
+            "ORDER BY COUNT(h) DESC")
+    List<Tuple> findTopArtistsAllTime(Pageable pageable);
+
 
 }

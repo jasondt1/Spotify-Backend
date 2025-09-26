@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AlbumRepository extends JpaRepository<Album, UUID> {
-    List<Album> findAllByDeletedFalse();
+    List<Album> findAllByDeletedFalseOrderByCreatedAtAsc();
     Optional<Album> findByIdAndDeletedFalse(UUID id);
     List<Album> findTop10ByDeletedFalseAndTitleContainingIgnoreCase(String title);
 

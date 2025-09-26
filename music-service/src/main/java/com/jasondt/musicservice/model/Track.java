@@ -49,6 +49,10 @@ public class Track {
     @OneToMany(mappedBy = "track")
     private List<History> histories = new ArrayList<>();
 
+    @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("timestamp ASC")
+    private List<LyricsLine> lyrics = new ArrayList<>();
+
     @Column(columnDefinition = "boolean not null default false")
     private boolean deleted = false;
 

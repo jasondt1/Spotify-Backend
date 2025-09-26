@@ -1,14 +1,15 @@
 package com.jasondt.authservice.controller;
 
-import com.jasondt.authservice.dto.LoginRequestDto;
-import com.jasondt.authservice.dto.RegisterRequestDto;
-import com.jasondt.authservice.dto.TokenResponseDto;
-import com.jasondt.authservice.dto.UserInfoDto;
+import com.jasondt.authservice.dto.*;
+import com.jasondt.authservice.exception.InvalidTokenException;
 import com.jasondt.authservice.service.AuthService;
+import com.jasondt.authservice.util.JwtUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,4 +34,15 @@ public class AuthController {
     public ResponseEntity<UserInfoDto> validateToken(@CookieValue(name = "jwt", required = false) String token) {
         return ResponseEntity.ok(authService.validateToken(token));
     }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestBody ChangePasswordRequestDto request
+    ) {
+        authService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

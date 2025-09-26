@@ -8,12 +8,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TrackRepository extends JpaRepository<Track, UUID> {
-    List<Track> findAllByDeletedFalse();
+    List<Track> findAllByDeletedFalseOrderByCreatedAtAsc();
     Optional<Track> findByIdAndDeletedFalse(UUID id);
     List<Track> findTop10ByDeletedFalseAndTitleContainingIgnoreCase(String title);
 
     List<Track> findTop10ByDeletedFalseAndArtistIdIn(List<UUID> artistIds);
 
     List<Track> findTop10ByDeletedFalseAndAlbumIdIn(List<UUID> albumIds);
+    List<Track> findByIdInAndDeletedFalse(Iterable<UUID> ids);
 
 }

@@ -49,7 +49,7 @@ public class AlbumService {
     }
 
     public List<AlbumResponseDto> getAll() {
-        return albumMapper.toDto(albumRepo.findAllByDeletedFalse());
+        return albumMapper.toDto(albumRepo.findAllByDeletedFalseOrderByCreatedAtAsc());
     }
 
     public AlbumResponseDto updateAlbum(UUID id, AlbumUpdateDto dto) {

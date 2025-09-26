@@ -6,9 +6,11 @@ import com.jasondt.musicservice.exception.DatabaseException;
 import com.jasondt.musicservice.exception.DuplicateTrackException;
 import com.jasondt.musicservice.exception.NotFoundException;
 import com.jasondt.musicservice.mapper.PlaylistMapper;
+import com.jasondt.musicservice.model.Album;
 import com.jasondt.musicservice.model.Playlist;
 import com.jasondt.musicservice.model.PlaylistTrack;
 import com.jasondt.musicservice.model.Track;
+import com.jasondt.musicservice.repository.AlbumRepository;
 import com.jasondt.musicservice.repository.PlaylistRepository;
 import com.jasondt.musicservice.repository.PlaylistTrackRepository;
 import com.jasondt.musicservice.repository.TrackRepository;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -29,6 +32,7 @@ public class PlaylistService {
     private final PlaylistMapper playlistMapper;
     private final UserClient userClient;
     private final LibraryService libraryService;
+    private final AlbumRepository albumRepo;
 
     @Transactional
     public PlaylistResponseDto create(UUID ownerId, PlaylistCreateDto dto) {
@@ -173,4 +177,56 @@ public class PlaylistService {
             throw new DatabaseException("Failed to remove track from playlist", e);
         }
     }
+
+    @Transactional
+    public PlaylistResponseDto addAlbum(UUID playlistId, UUID ownerId, UUID albumId) {
+        Playlist p = playlistRepo.findByIdAndDeletedFalse(playlistId)
+                .orElseThrow(() -> new NotFoundException("Playlist not found with ID: " + playlistId));
+        if (!p.getOwnerId().equals(ownerId)) {
+            throw new NotFoundException("Playlist not found with ID: " + playlistId);
+        }
+        try {
+            Album album = albumRepo.findByIdAndDeletedFalse(albumId)
+                    .orElseThrow(() -> new NotFoundException("Album not found with ID: " + albumId));
+
+            Set<UUID> existing = p.getTracks() == null
+                    ? new HashSet<>()
+                    : p.getTracks().stream()
+                    .filter(pt -> !pt.isDeleted())
+                    .map(pt -> pt.getTrack().getId())
+                    .collect(Collectors.toSet());
+
+            int nextPos = p.getTracks() == null ? 0 : p.getTracks().size();
+
+            for (Track t : album.getTracks()) {
+                if (existing.contains(t.getId())) continue;
+                PlaylistTrack pt = new PlaylistTrack();
+                pt.setTrack(t);
+                pt.setPosition(nextPos++);
+                p.addPlaylistTrack(pt);
+            }
+
+            return playlistMapper.toDto(playlistRepo.save(p));
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to add album to playlist", e);
+        }
+    }
+    public List<PlaylistResponseDto> getByUserId(UUID userId) {
+        List<Playlist> playlists = playlistRepo.findAllByOwnerIdAndDeletedFalse(userId);
+        List<PlaylistResponseDto> dtos = playlistMapper.toDto(playlists);
+
+        try {
+            UserResponseDto user = userClient.getUserById(userId);
+            for (PlaylistResponseDto dto : dtos) {
+                dto.setOwner(user);
+            }
+        } catch (Exception e) {
+            for (PlaylistResponseDto dto : dtos) {
+                dto.setOwner(null);
+            }
+        }
+
+        return dtos;
+    }
+
 }

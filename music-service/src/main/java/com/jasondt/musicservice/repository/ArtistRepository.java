@@ -8,7 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ArtistRepository extends JpaRepository<Artist, UUID> {
-    List<Artist> findAllByDeletedFalse();
+    List<Artist> findAllByDeletedFalseOrderByCreatedAtAsc();
     Optional<Artist> findByIdAndDeletedFalse(UUID id);
     List<Artist> findTop10ByDeletedFalseAndNameContainingIgnoreCase(String name);
+    List<Artist> findByIdInAndDeletedFalse(Iterable<UUID> ids);
 }

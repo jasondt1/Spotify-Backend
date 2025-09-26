@@ -88,4 +88,22 @@ public class AuthService {
         String role = jwtUtil.extractRole(token);
         return new UserInfoDto(userId, role);
     }
+
+    public void changePassword(UUID userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new InvalidCredentialsException("Old password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        try {
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to update password", e);
+        }
+    }
+
 }
