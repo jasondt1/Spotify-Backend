@@ -1,5 +1,7 @@
 package com.jasondt.apigateway.config;
 
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -13,7 +15,11 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("https://spotify-frontend-153611945963.asia-southeast2.run.app");
+        config.setAllowedOrigins(Arrays.asList(
+            "https://spotify-frontend-153611945963.asia-southeast2.run.app",
+            "https://spotify-frontend-153611945963.asia-southeast1.run.app",
+            "https://spotify.jasondt.site"
+        ));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setMaxAge(3600L);
