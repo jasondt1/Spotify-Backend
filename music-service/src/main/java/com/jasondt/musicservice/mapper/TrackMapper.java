@@ -2,7 +2,6 @@ package com.jasondt.musicservice.mapper;
 
 import com.jasondt.musicservice.dto.*;
 import com.jasondt.musicservice.model.Artist;
-import com.jasondt.musicservice.model.LyricsLine;
 import com.jasondt.musicservice.model.Track;
 import org.mapstruct.*;
 

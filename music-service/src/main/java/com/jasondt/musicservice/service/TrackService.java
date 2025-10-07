@@ -170,6 +170,8 @@ public class TrackService {
         Track track = trackRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Track not found with ID: " + id));
         long plays = historyRepo.countByTrack_IdAndTrack_DeletedFalse(id);
-        return new TrackWithPlayCountResponseDto(trackMapper.toDto(track), plays);
+        TrackResponseDto dto = trackMapper.toDto(track);
+        dto.setLyrics(mapLyrics(track));
+        return new TrackWithPlayCountResponseDto(dto, plays);
     }
 }
