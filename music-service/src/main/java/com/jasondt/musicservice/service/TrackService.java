@@ -77,7 +77,9 @@ public class TrackService {
     public TrackResponseDto getById(UUID id) {
         Track track = trackRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Track not found with ID: " + id));
-        return trackMapper.toDto(track, true);
+        TrackResponseDto dto = trackMapper.toDto(track);
+        dto.setLyrics(mapLyrics(track));
+        return dto;
     }
 
     public TrackResponseDto updateTrack(UUID id, TrackUpdateDto dto) {
@@ -137,6 +139,19 @@ public class TrackService {
                     line.setText(l.getText());
                     track.getLyrics().add(line);
                 });
+    }
+
+    private List<LyricsLineDto> mapLyrics(Track track) {
+        if (track == null || track.getLyrics() == null) return null;
+        List<LyricsLineDto> list = new ArrayList<>();
+        for (LyricsLine line : track.getLyrics()) {
+            if (line == null) continue;
+            LyricsLineDto ld = new LyricsLineDto();
+            ld.setTimestamp(line.getTimestamp());
+            ld.setText(line.getText());
+            list.add(ld);
+        }
+        return list;
     }
 
     public void deleteTrack(UUID id) {

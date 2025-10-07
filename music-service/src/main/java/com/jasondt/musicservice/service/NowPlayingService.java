@@ -1,10 +1,12 @@
 package com.jasondt.musicservice.service;
 
 import com.jasondt.musicservice.dto.NowPlayingResponseDto;
+import com.jasondt.musicservice.dto.LyricsLineDto;
 import com.jasondt.musicservice.dto.TrackResponseDto;
 import com.jasondt.musicservice.exception.NotFoundException;
 import com.jasondt.musicservice.mapper.TrackMapper;
 import com.jasondt.musicservice.model.NowPlaying;
+import com.jasondt.musicservice.model.LyricsLine;
 import com.jasondt.musicservice.model.Track;
 import com.jasondt.musicservice.repository.NowPlayingRepository;
 import com.jasondt.musicservice.repository.TrackRepository;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,7 +41,9 @@ public class NowPlayingService {
         NowPlaying np = upsertNowPlaying(userId, track,
                 track.getArtist() == null ? null : track.getArtist().getId(), null, null);
         nowPlayingRepo.save(np);
-        return trackMapper.toDto(track, true);
+        TrackResponseDto dto = trackMapper.toDto(track);
+        dto.setLyrics(mapLyrics(track));
+        return dto;
     }
 
     @Transactional
@@ -96,12 +102,27 @@ public class NowPlayingService {
 
     private NowPlayingResponseDto toDto(NowPlaying np) {
         NowPlayingResponseDto dto = new NowPlayingResponseDto();
-        dto.setTrack(trackMapper.toDto(np.getTrack(), true));
+        TrackResponseDto trackDto = trackMapper.toDto(np.getTrack());
+        trackDto.setLyrics(mapLyrics(np.getTrack()));
+        dto.setTrack(trackDto);
         dto.setStartedAt(np.getStartedAt());
         dto.setPositionSec(np.getPositionSec() == null ? 0 : np.getPositionSec());
         dto.setArtistId(np.getArtistId());
         dto.setAlbumId(np.getAlbumId());
         dto.setPlaylistId(np.getPlaylistId());
         return dto;
+    }
+
+    private List<LyricsLineDto> mapLyrics(Track track) {
+        if (track == null || track.getLyrics() == null) return null;
+        List<LyricsLineDto> list = new ArrayList<>();
+        for (LyricsLine line : track.getLyrics()) {
+            if (line == null) continue;
+            LyricsLineDto ld = new LyricsLineDto();
+            ld.setTimestamp(line.getTimestamp());
+            ld.setText(line.getText());
+            list.add(ld);
+        }
+        return list;
     }
 }
