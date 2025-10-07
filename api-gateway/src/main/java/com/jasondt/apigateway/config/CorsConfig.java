@@ -13,7 +13,7 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedOrigin("https://spotify-frontend-153611945963.asia-southeast2.run.app");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setMaxAge(3600L);
