@@ -1,5 +1,6 @@
 package com.jasondt.musicservice.service;
 
+import com.jasondt.musicservice.dto.LyricsLineDto;
 import com.jasondt.musicservice.dto.TrackCreateDto;
 import com.jasondt.musicservice.dto.TrackResponseDto;
 import com.jasondt.musicservice.dto.TrackUpdateDto;
@@ -72,6 +73,13 @@ public class TrackService {
         return trackMapper.toDto(trackRepo.findAllByDeletedFalseOrderByCreatedAtAsc());
     }
 
+    @Transactional(readOnly = true)
+    public TrackResponseDto getById(UUID id) {
+        Track track = trackRepo.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Track not found with ID: " + id));
+        return trackMapper.toDto(track, true);
+    }
+
     public TrackResponseDto updateTrack(UUID id, TrackUpdateDto dto) {
         Track track = trackRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Track not found with ID: " + id));
@@ -112,7 +120,7 @@ public class TrackService {
         }
     }
 
-    private void applyLyrics(Track track, List<com.jasondt.musicservice.dto.LyricsLineDto> lyricsDtos) {
+    private void applyLyrics(Track track, List<LyricsLineDto> lyricsDtos) {
         if (lyricsDtos == null) return;
         if (track.getLyrics() == null) {
             track.setLyrics(new ArrayList<>());

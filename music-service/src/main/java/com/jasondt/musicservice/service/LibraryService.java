@@ -1,11 +1,13 @@
 package com.jasondt.musicservice.service;
 
 import com.jasondt.musicservice.client.UserClient;
+import com.jasondt.musicservice.dto.ArtistSimpleDto;
 import com.jasondt.musicservice.dto.LibraryResponseDto;
 import com.jasondt.musicservice.dto.TrackResponseDto;
 import com.jasondt.musicservice.dto.UserResponseDto;
 import com.jasondt.musicservice.mapper.LibraryMapper;
 import com.jasondt.musicservice.mapper.TrackMapper;
+import com.jasondt.musicservice.mapper.SimpleMapper;
 import com.jasondt.musicservice.model.Album;
 import com.jasondt.musicservice.model.Library;
 import com.jasondt.musicservice.model.LibraryAlbum;
@@ -35,6 +37,7 @@ public class LibraryService {
     private final LibraryPlaylistRepository libraryPlaylistRepository;
     private final LibraryAlbumRepository libraryAlbumRepository;
     private final TrackMapper trackMapper;
+    private final SimpleMapper simpleMapper;
     private final UserClient userClient;
 
     public LibraryService(LibraryRepository libraryRepository,
@@ -44,6 +47,7 @@ public class LibraryService {
                           LibraryAlbumRepository libraryAlbumRepository,
                           LibraryMapper libraryMapper,
                           TrackMapper trackMapper,
+                          SimpleMapper simpleMapper,
                           UserClient userClient) {
         this.libraryRepository = libraryRepository;
         this.albumRepository = albumRepository;
@@ -51,6 +55,7 @@ public class LibraryService {
         this.libraryPlaylistRepository = libraryPlaylistRepository;
         this.libraryAlbumRepository = libraryAlbumRepository;
         this.trackMapper = trackMapper;
+        this.simpleMapper = simpleMapper;
         this.userClient = userClient;
     }
 
@@ -91,7 +96,7 @@ public class LibraryService {
                 pts.stream()
                         .sorted(Comparator.comparing(pt -> pt.getPosition() == null ? Integer.MAX_VALUE : pt.getPosition()))
                         .map(PlaylistTrack::getTrack)
-                        .map(trackMapper::toDto)
+                        .map(this::toTrackWithoutLyrics)
                         .forEach(tracks::add);
             }
             dto.setTracks(tracks);
@@ -109,7 +114,7 @@ public class LibraryService {
             List<TrackResponseDto> tracks = new ArrayList<>();
             if (a.getTracks() != null) {
                 a.getTracks().stream()
-                        .map(trackMapper::toDto)
+                        .map(this::toTrackWithoutLyrics)
                         .forEach(tracks::add);
             }
             dto.setTracks(tracks);
@@ -214,5 +219,44 @@ public class LibraryService {
                 });
         link.setLastPlayedAt(Instant.now());
         libraryRepository.save(library);
+    }
+
+    private TrackResponseDto toTrackWithoutLyrics(com.jasondt.musicservice.model.Track t) {
+        if (t == null) return null;
+        TrackResponseDto dto = new TrackResponseDto();
+        dto.setId(t.getId());
+        dto.setTitle(t.getTitle());
+        dto.setDuration(t.getDuration() == null ? 0 : t.getDuration());
+        dto.setAudio(t.getAudio());
+        dto.setCreatedAt(t.getCreatedAt());
+        dto.setUpdatedAt(t.getUpdatedAt());
+
+        List<ArtistSimpleDto> artists = new java.util.ArrayList<>();
+        if (t.getArtist() != null && !t.getArtist().isDeleted()) {
+            artists.add(simpleMapper.toArtistSimpleDto(t.getArtist()));
+        }
+        if (t.getOtherArtists() != null) {
+            for (com.jasondt.musicservice.model.Artist a : t.getOtherArtists()) {
+                if (a != null && !a.isDeleted()) {
+                    if (t.getArtist() != null && a.getId() != null && a.getId().equals(t.getArtist().getId())) {
+                        continue;
+                    }
+                    artists.add(simpleMapper.toArtistSimpleDto(a));
+                }
+            }
+        }
+        dto.setArtists(artists);
+
+        if (t.getAlbum() != null) {
+            com.jasondt.musicservice.dto.AlbumSimpleDto a = new com.jasondt.musicservice.dto.AlbumSimpleDto();
+            a.setId(t.getAlbum().getId());
+            a.setTitle(t.getAlbum().getTitle());
+            a.setImage(t.getAlbum().getImage());
+            a.setReleaseDate(t.getAlbum().getReleaseDate());
+            dto.setAlbum(a);
+        }
+
+        dto.setLyrics(null);
+        return dto;
     }
 }

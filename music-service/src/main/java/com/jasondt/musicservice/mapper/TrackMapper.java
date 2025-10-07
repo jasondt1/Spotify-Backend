@@ -2,6 +2,7 @@ package com.jasondt.musicservice.mapper;
 
 import com.jasondt.musicservice.dto.*;
 import com.jasondt.musicservice.model.Artist;
+import com.jasondt.musicservice.model.LyricsLine;
 import com.jasondt.musicservice.model.Track;
 import org.mapstruct.*;
 
@@ -11,14 +12,21 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public abstract class TrackMapper {
 
-    public abstract TrackResponseDto toDto(Track entity);
-    public abstract List<TrackResponseDto> toDto(List<Track> entityList);
+    public TrackResponseDto toDto(Track entity) { return toDto(entity, false); }
+    public List<TrackResponseDto> toDto(List<Track> entityList) {
+        if (entityList == null) return null;
+        List<TrackResponseDto> out = new ArrayList<>();
+        for (Track t : entityList) out.add(toDto(t, false));
+        return out;
+    }
+
+    public abstract TrackResponseDto toDto(Track entity, @Context boolean includeLyrics);
     public abstract Track toEntity(TrackCreateDto dto);
 
     protected abstract ArtistSimpleDto toDto(Artist entity);
 
     @AfterMapping
-    protected void mapArtists(Track entity, @MappingTarget TrackResponseDto dto) {
+    protected void afterMap(Track entity, @MappingTarget TrackResponseDto dto, @Context boolean includeLyrics) {
         if (entity == null) return;
         List<ArtistSimpleDto> list = new ArrayList<>();
         if (entity.getArtist() != null && !entity.getArtist().isDeleted()) {
@@ -43,9 +51,9 @@ public abstract class TrackMapper {
             a.setReleaseDate(entity.getAlbum().getReleaseDate());
             dto.setAlbum(a);
         }
-        if (entity.getLyrics() != null) {
-            java.util.List<LyricsLineDto> lyrics = new java.util.ArrayList<>();
-            for (com.jasondt.musicservice.model.LyricsLine line : entity.getLyrics()) {
+        if (includeLyrics && entity.getLyrics() != null) {
+            List<LyricsLineDto> lyrics = new java.util.ArrayList<>();
+            for (LyricsLine line : entity.getLyrics()) {
                 if (line == null) continue;
                 LyricsLineDto ld = new LyricsLineDto();
                 ld.setTimestamp(line.getTimestamp());
@@ -53,6 +61,8 @@ public abstract class TrackMapper {
                 lyrics.add(ld);
             }
             dto.setLyrics(lyrics);
+        } else {
+            dto.setLyrics(null);
         }
     }
 }

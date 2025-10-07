@@ -32,6 +32,11 @@ public class TrackController {
         return ResponseEntity.ok(service.getAll());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TrackResponseDto> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.getById(id));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TrackResponseDto> update(@PathVariable UUID id,
                                                    @RequestBody @Valid TrackUpdateDto dto) {

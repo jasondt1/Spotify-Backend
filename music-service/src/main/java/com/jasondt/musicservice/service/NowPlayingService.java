@@ -37,7 +37,7 @@ public class NowPlayingService {
         NowPlaying np = upsertNowPlaying(userId, track,
                 track.getArtist() == null ? null : track.getArtist().getId(), null, null);
         nowPlayingRepo.save(np);
-        return trackMapper.toDto(track);
+        return trackMapper.toDto(track, true);
     }
 
     @Transactional
@@ -96,7 +96,7 @@ public class NowPlayingService {
 
     private NowPlayingResponseDto toDto(NowPlaying np) {
         NowPlayingResponseDto dto = new NowPlayingResponseDto();
-        dto.setTrack(trackMapper.toDto(np.getTrack()));
+        dto.setTrack(trackMapper.toDto(np.getTrack(), true));
         dto.setStartedAt(np.getStartedAt());
         dto.setPositionSec(np.getPositionSec() == null ? 0 : np.getPositionSec());
         dto.setArtistId(np.getArtistId());
