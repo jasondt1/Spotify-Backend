@@ -28,6 +28,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
     private static final List<Pattern> PUBLIC_PATTERNS = List.of(
             Pattern.compile("^/api/auth/login$"),
             Pattern.compile("^/api/auth/register$"),
+            Pattern.compile("^/api/auth/auto-login$"),
             Pattern.compile("^/swagger-ui.*"),
             Pattern.compile("^/v3/api-docs.*"),
             Pattern.compile("^/api/public.*"),
