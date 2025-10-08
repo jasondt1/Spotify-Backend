@@ -18,7 +18,8 @@ public class CorsConfig {
         config.setAllowedOrigins(Arrays.asList(
             "https://spotify-frontend-153611945963.asia-southeast2.run.app",
             "https://spotify-frontend-153611945963.asia-southeast1.run.app",
-            "https://spotify.jasondt.site"
+            "https://spotify.jasondt.site",
+            "http://localhost:3000"
         ));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
