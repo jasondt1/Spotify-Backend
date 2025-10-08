@@ -30,6 +30,12 @@ public class AuthController {
         return new ResponseEntity<>(new TokenResponseDto(token), HttpStatus.OK);
     }
 
+    @PostMapping("/auto-login")
+    public ResponseEntity<TokenResponseDto> autoLogin() {
+        String token = authService.login("string", "string");
+        return ResponseEntity.ok(new TokenResponseDto(token));
+    }
+
     @GetMapping("/validate")
     public ResponseEntity<UserInfoDto> validateToken(@CookieValue(name = "jwt", required = false) String token) {
         return ResponseEntity.ok(authService.validateToken(token));
