@@ -78,7 +78,7 @@ class UserControllerTest {
 
     @Test
     void getUserById_Success() {
-        when(userService.getUserById(userId)).thenReturn(Optional.of(userResponseDto));
+        when(userService.getUserById(userId)).thenReturn(userResponseDto);
 
         ResponseEntity<UserResponseDto> response = userController.getUserById(userId);
 
@@ -88,7 +88,7 @@ class UserControllerTest {
 
     @Test
     void getUserById_NotFound() {
-        when(userService.getUserById(userId)).thenReturn(Optional.empty());
+        when(userService.getUserById(userId)).thenReturn(null);
 
         ResponseEntity<UserResponseDto> response = userController.getUserById(userId);
 
@@ -97,7 +97,7 @@ class UserControllerTest {
 
     @Test
     void getMe_Success() {
-        when(userService.getUserById(userId)).thenReturn(Optional.of(userResponseDto));
+        when(userService.getUserById(userId)).thenReturn(userResponseDto);
 
         ResponseEntity<UserResponseDto> response = userController.getMe(userId);
 
@@ -107,7 +107,7 @@ class UserControllerTest {
 
     @Test
     void getMe_NotFound() {
-        when(userService.getUserById(userId)).thenReturn(Optional.empty());
+        when(userService.getUserById(userId)).thenReturn(null);
 
         ResponseEntity<UserResponseDto> response = userController.getMe(userId);
 
@@ -135,7 +135,7 @@ class UserControllerTest {
     @Test
     void updateUser_Success() {
         UserUpdateDto updateDto = new UserUpdateDto();
-        when(userService.updateUser(eq(userId), any(UserUpdateDto.class))).thenReturn(Optional.of(userResponseDto));
+        when(userService.updateUser(eq(userId), any(UserUpdateDto.class))).thenReturn(userResponseDto);
 
         ResponseEntity<UserResponseDto> response = userController.updateUser(userId, updateDto);
 
@@ -146,7 +146,7 @@ class UserControllerTest {
     @Test
     void updateUser_NotFound() {
         UserUpdateDto updateDto = new UserUpdateDto();
-        when(userService.updateUser(eq(userId), any(UserUpdateDto.class))).thenReturn(Optional.empty());
+        when(userService.updateUser(eq(userId), any(UserUpdateDto.class))).thenReturn(null);
 
         ResponseEntity<UserResponseDto> response = userController.updateUser(userId, updateDto);
 

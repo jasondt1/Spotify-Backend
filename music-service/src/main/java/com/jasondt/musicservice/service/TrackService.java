@@ -17,7 +17,11 @@ import com.jasondt.musicservice.repository.HistoryRepository;
 import com.jasondt.musicservice.repository.TrackRepository;
 import com.jasondt.musicservice.repository.ArtistRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +41,7 @@ public class TrackService {
     private final HistoryRepository historyRepo;
 
     @Transactional
+    @CacheEvict(value = "allTracks", allEntries = true)
     public TrackResponseDto addTrack(TrackCreateDto dto) {
         try {
             Album album = albumRepo.findByIdAndDeletedFalse(dto.getAlbumId())
@@ -69,11 +74,13 @@ public class TrackService {
         }
     }
 
+    @Cacheable(value = "allTracks")
     public List<TrackResponseDto> getAll() {
         return trackMapper.toDto(trackRepo.findAllByDeletedFalseOrderByCreatedAtAsc());
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "tracks", key = "#id")
     public TrackResponseDto getById(UUID id) {
         Track track = trackRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Track not found with ID: " + id));
@@ -82,6 +89,8 @@ public class TrackService {
         return dto;
     }
 
+    @CachePut(value = "tracks", key = "#id")
+    @CacheEvict(value = "allTracks", allEntries = true)
     public TrackResponseDto updateTrack(UUID id, TrackUpdateDto dto) {
         Track track = trackRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Track not found with ID: " + id));
@@ -154,6 +163,10 @@ public class TrackService {
         return list;
     }
 
+     @Caching(evict = {
+        @CacheEvict(value = "tracks", key = "#id"),
+        @CacheEvict(value = "allTracks", allEntries = true)
+    })
     public void deleteTrack(UUID id) {
         Track track = trackRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Cannot delete. Track not found with ID: " + id));

@@ -11,7 +11,11 @@ import com.jasondt.musicservice.model.Artist;
 import com.jasondt.musicservice.repository.AlbumRepository;
 import com.jasondt.musicservice.repository.ArtistRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +29,7 @@ public class AlbumService {
     private final ArtistRepository artistRepo;
     private final AlbumMapper albumMapper;
 
+    @CacheEvict(value = "allAlbums", allEntries = true)
     public AlbumResponseDto createAlbum(AlbumCreateDto dto) {
         try {
             Artist artist = artistRepo.findByIdAndDeletedFalse(dto.getArtistId())
@@ -42,16 +47,20 @@ public class AlbumService {
         }
     }
 
+    @Cacheable(value = "albums", key = "#id")
     public AlbumResponseDto getAlbum(UUID id) {
         Album album = albumRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Album not found with ID: " + id));
         return albumMapper.toDto(album);
     }
 
+    @Cacheable(value = "allAlbums")
     public List<AlbumResponseDto> getAll() {
         return albumMapper.toDto(albumRepo.findAllByDeletedFalseOrderByCreatedAtAsc());
     }
 
+    @CachePut(value = "albums", key = "#id")
+    @CacheEvict(value = "allAlbums", allEntries = true)
     public AlbumResponseDto updateAlbum(UUID id, AlbumUpdateDto dto) {
         Album album = albumRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Album not found with ID: " + id));
@@ -80,6 +89,10 @@ public class AlbumService {
         }
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "albums", key = "#id"),
+        @CacheEvict(value = "allAlbums", allEntries = true)
+    })
     public void deleteAlbum(UUID id) {
         Album album = albumRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Cannot delete. Album not found with ID: " + id));

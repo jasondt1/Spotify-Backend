@@ -28,6 +28,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/userdb
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: pass
+
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
     ports:
       - "8081:8081"
     networks:
@@ -63,6 +66,9 @@ services:
       SPRING_DATASOURCE_USERNAME: music
       SPRING_DATASOURCE_PASSWORD: pass
       USER_SERVICE_URL: http://user-service:8081/api/users
+
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
     ports:
       - "8083:8083"
     networks:

@@ -15,7 +15,11 @@ import com.jasondt.musicservice.repository.PlaylistRepository;
 import com.jasondt.musicservice.repository.PlaylistTrackRepository;
 import com.jasondt.musicservice.repository.TrackRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,7 @@ public class PlaylistService {
     private final AlbumRepository albumRepo;
 
     @Transactional
+    @CacheEvict(value = "allPlaylists", allEntries = true)
     public PlaylistResponseDto create(UUID ownerId, PlaylistCreateDto dto) {
         try {
             Playlist playlist = new Playlist();
@@ -66,6 +71,7 @@ public class PlaylistService {
 
     
 
+    @Cacheable(value = "playlists", key = "#id")
     public PlaylistResponseDto getById(UUID id) {
         Playlist p = playlistRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Playlist not found with ID: " + id));
@@ -102,6 +108,8 @@ public class PlaylistService {
 
 
     @Transactional
+    @CachePut(value = "playlists", key = "#id")
+    @CacheEvict(value = "allPlaylists", allEntries = true)
     public PlaylistResponseDto update(UUID id, UUID ownerId, PlaylistUpdateDto dto) {
         Playlist p = playlistRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Playlist not found with ID: " + id));
@@ -119,6 +127,10 @@ public class PlaylistService {
     }
 
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "playlists", key = "#id"),
+        @CacheEvict(value = "allPlaylists", allEntries = true)
+    })
     public void delete(UUID id, UUID ownerId) {
         Playlist p = playlistRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Playlist not found with ID: " + id));
@@ -134,6 +146,7 @@ public class PlaylistService {
     }
 
     @Transactional
+    @CacheEvict(value = "playlists", key = "#id")
     public PlaylistResponseDto addTracks(UUID id, UUID ownerId, UUID trackId) {
         Playlist p = playlistRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Playlist not found with ID: " + id));
@@ -161,6 +174,7 @@ public class PlaylistService {
     }
 
     @Transactional
+    @CacheEvict(value = "playlists", key = "#id")
     public void removeTrack(UUID id, UUID ownerId, UUID trackId) {
         Playlist p = playlistRepo.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Playlist not found with ID: " + id));
@@ -179,6 +193,7 @@ public class PlaylistService {
     }
 
     @Transactional
+    @CacheEvict(value = "playlists", key = "#playlistId")
     public PlaylistResponseDto addAlbum(UUID playlistId, UUID ownerId, UUID albumId) {
         Playlist p = playlistRepo.findByIdAndDeletedFalse(playlistId)
                 .orElseThrow(() -> new NotFoundException("Playlist not found with ID: " + playlistId));

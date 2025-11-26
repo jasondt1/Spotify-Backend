@@ -109,22 +109,25 @@ class UserServiceTest {
 
     @Test
     void getUserById_Success() {
-        when(userRepository.findByIdAndDeletedFalse(userId)).thenReturn(Optional.of(user));
-        when(userMapper.toDto(user)).thenReturn(userResponseDto);
+        when(userRepository.findByIdAndDeletedFalse(userId))
+                .thenReturn(Optional.of(user));
+        when(userMapper.toDto(user))
+                .thenReturn(userResponseDto);
 
-        Optional<UserResponseDto> result = userService.getUserById(userId);
+        UserResponseDto result = userService.getUserById(userId);
 
-        assertTrue(result.isPresent());
-        assertEquals(userResponseDto.getName(), result.get().getName());
+        assertNotNull(result);
+        assertEquals("John Doe", result.getName());
     }
 
     @Test
     void getUserById_NotFound() {
-        when(userRepository.findByIdAndDeletedFalse(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedFalse(userId))
+                .thenReturn(Optional.empty());
 
-        Optional<UserResponseDto> result = userService.getUserById(userId);
+        UserResponseDto result = userService.getUserById(userId);
 
-        assertTrue(result.isEmpty());
+        assertNull(result);
     }
 
     @Test
@@ -145,26 +148,30 @@ class UserServiceTest {
         UserResponseDto updatedDto = new UserResponseDto();
         updatedDto.setName("Jane Doe");
 
-        when(userRepository.findByIdAndDeletedFalse(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(updatedUser);
-        when(userMapper.toDto(any(User.class))).thenReturn(updatedDto);
+        when(userRepository.findByIdAndDeletedFalse(userId))
+                .thenReturn(Optional.of(user));
+        when(userRepository.save(user))
+                .thenReturn(updatedUser);
+        when(userMapper.toDto(updatedUser))
+                .thenReturn(updatedDto);
 
-        Optional<UserResponseDto> result = userService.updateUser(userId, updateDto);
+        UserResponseDto result = userService.updateUser(userId, updateDto);
 
-        assertTrue(result.isPresent());
-        assertEquals("Jane Doe", result.get().getName());
-        verify(userRepository).save(user);
+        assertNotNull(result);
+        assertEquals("Jane Doe", result.getName());
     }
 
     @Test
     void updateUser_NotFound() {
         UserUpdateDto updateDto = new UserUpdateDto();
-        when(userRepository.findByIdAndDeletedFalse(userId)).thenReturn(Optional.empty());
 
-        Optional<UserResponseDto> result = userService.updateUser(userId, updateDto);
+        when(userRepository.findByIdAndDeletedFalse(userId))
+                .thenReturn(Optional.empty());
 
-        assertTrue(result.isEmpty());
-        verify(userRepository, never()).save(any(User.class));
+        UserResponseDto result = userService.updateUser(userId, updateDto);
+
+        assertNull(result);
+        verify(userRepository, never()).save(any());
     }
 
     @Test

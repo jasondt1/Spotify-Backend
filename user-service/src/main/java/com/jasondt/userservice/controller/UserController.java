@@ -2,6 +2,7 @@ package com.jasondt.userservice.controller;
 
 import com.jasondt.userservice.dto.UserCreateDto;
 import com.jasondt.userservice.dto.UserResponseDto;
+import com.jasondt.userservice.dto.UserUpdateDto;
 import com.jasondt.userservice.service.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
@@ -34,18 +35,26 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id) {
-        return userService.getUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        UserResponseDto dto = userService.getUserById(id);
+
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getMe(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId
     ) {
-        return userService.getUserById(userId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        UserResponseDto dto = userService.getUserById(userId);
+
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping("/{id}")
@@ -56,10 +65,15 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable UUID id,
-                                                      @RequestBody com.jasondt.userservice.dto.UserUpdateDto dto) {
-        return userService.updateUser(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                                                      @RequestBody UserUpdateDto dto) {
+        UserResponseDto updated = userService.updateUser(id, dto);
+
+        if (updated == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(updated);
     }
+
 
 }
