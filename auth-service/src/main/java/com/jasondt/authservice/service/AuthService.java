@@ -1,6 +1,7 @@
 package com.jasondt.authservice.service;
 
-import com.jasondt.authservice.client.UserClient;
+import com.jasondt.authservice.event.EventProducer;
+import com.jasondt.authservice.event.UserRegisteredEvent;
 import com.jasondt.authservice.dto.UserInfoDto;
 import com.jasondt.authservice.exception.DatabaseException;
 import com.jasondt.authservice.exception.InvalidCredentialsException;
@@ -22,7 +23,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final UserClient userClient;
+    private final EventProducer eventProducer;
 
     public String register(String email, String password, String name, Date birthday, String gender) {
         if (userRepository.findByEmail(email).isPresent()) {
@@ -41,15 +42,17 @@ public class AuthService {
         }
 
         try {
-            userClient.createUser(
-                    user.getId(),
-                    email,
-                    name,
-                    birthday,
-                    gender
-            );
+            UserRegisteredEvent event = UserRegisteredEvent.builder()
+                    .userId(user.getId())
+                    .username(email)
+                    .name(name)
+                    .birthday(birthday)
+                    .gender(gender)
+                    .build();
+
+            eventProducer.sendUserRegisteredEvent(event);
         } catch (Exception e) {
-            throw new DatabaseException("Failed to create user in user service", e);
+            throw new DatabaseException("Failed to publish user registered event", e);
         }
 
         return jwtUtil.generateToken(user.getId(), user.getRole());

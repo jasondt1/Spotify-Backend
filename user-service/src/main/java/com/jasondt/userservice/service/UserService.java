@@ -27,6 +27,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    public boolean existsById(UUID id) {
+        return userRepository.existsById(id);
+    }
+
     @CacheEvict(value = "allUsers", allEntries = true)
     public UserResponseDto createUser(UserCreateDto userDto) {
         try {

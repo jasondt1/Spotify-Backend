@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+  cloud:
+    stream:
+      bindings:
+        userRegistered-in-0:
+          destination: user-registered-topic
+          group: music-service-group
+          consumer:
+            max-attempts: 3
+            back-off-initial-interval: 1000
+            back-off-max-interval: 10000
+            back-off-multiplier: 2.0
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS:localhost:9092}
+        bindings:
+          userRegistered-in-0:
+            consumer:
+              enable-dlq: true
+              dlq-name: user-registered-topic.music-service-group.dlq
+              auto-commit-on-error: true
+
+server:
+  port: ${SERVER_PORT:8083}
+
+user:
+  service:
+    url: ${USER_SERVICE_URL}
+
+springdoc:
+  swagger-ui:
+    path: /music/swagger-ui
+    url: /music/v3/api-docs
+    config-url: /music/v3/api-docs/swagger-config
+  api-docs:
+    path: /music/v3/api-docs
