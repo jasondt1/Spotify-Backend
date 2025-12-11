@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: graph-bff
+  graphql:
+    graphiql:
+      enabled: true
+      path: /graphiql
+
+server:
+  port: 8084
+
+jwt:
+  secret: myLocalSecretKeyForJWT
+
+gateway:
+  url: http://localhost:8080
+
+logging:
+  level:
+    org.springframework.graphql: DEBUG
+    org.springframework.web: DEBUG
+
